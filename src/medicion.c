@@ -39,7 +39,7 @@ void medir() {
     fprintf(f_rand, "N,Bubble,Insertion,Selection,Cocktail\n");
     fprintf(f_mejor, "N,Bubble,Insertion,Selection,Cocktail\n");
     fprintf(f_peor, "N,Bubble,Insertion,Selection,Cocktail\n");
-    fprintf(f_search, "N,Secuencial,Binaria\n");
+    fprintf(f_search, "N,Caso,Secuencial,BinariaRec,Exponencial,Interpolacion\n");
 
     int tamanos[] = {1000, 3000, 5000, 8000, 10000}; 
     int num_pasos = 5;
@@ -91,19 +91,49 @@ void medir() {
         // ... (repetir similar para el resto de algoritmos en el peor caso)
         fprintf(f_peor, "%d,%.6f,%.6f,%.6f,%.6f\n", n, t[0], t[1], t[2], t[3]);
 
-        // --- 4. BÚSQUEDAS (Peor caso: ID inexistente) ---
-        preparar_mejor_caso(arr, n); // Para binaria debe estar ordenado
-        start = clock();
-        for(int j = 0; j < 1000; j++) busquedaSecuencial(arr, n, -1);
-        end = clock();
-        double t_seq = ((double)(end - start) / CLOCKS_PER_SEC) / 1000;
+        // --- 4. EXPERIMENTOS DE BÚSQUEDA ---
+        preparar_mejor_caso(arr, n); // Para la mayoría de algoritmos, debe estar ordenado
+        int repeticiones_busqueda = 50000; // Un número alto porque las búsquedas son muy rápidas
+        
+        // --- PEOR CASO (Buscando un ID inexistente: -1) ---
+        int target_peor = -1;
+        double t_seq_peor, t_bin_peor, t_exp_peor, t_int_peor;
 
-        start = clock();
-        for(int j = 0; j < 1000; j++) busquedaBinaria(arr, n, -1);
-        end = clock();
-        double t_bin = ((double)(end - start) / CLOCKS_PER_SEC) / 1000;
-        fprintf(f_search, "%d,%.10f,%.10f\n", n, t_seq, t_bin);
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaSecuencial(arr, n, target_peor); end = clock();
+        t_seq_peor = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
 
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaBinariaRecursiva(arr, 0, n-1, target_peor); end = clock();
+        t_bin_peor = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaExponencial(arr, n, target_peor); end = clock();
+        t_exp_peor = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaInterpolacion(arr, n, target_peor); end = clock();
+        t_int_peor = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        fprintf(f_search, "%d,PEOR,%.10f,%.10f,%.10f,%.10f\n", n, t_seq_peor, t_bin_peor, t_exp_peor, t_int_peor);
+
+        // --- CASO PROMEDIO (Buscando IDs aleatorios que SÍ existen) ---
+        double t_seq_prom = 0, t_bin_prom = 0, t_exp_prom = 0, t_int_prom = 0;
+        
+        // Pre-generar los targets aleatorios para no afectar el tiempo midiendo 'rand()'
+        int *targets = (int*)malloc(repeticiones_busqueda * sizeof(int));
+        for(int j=0; j<repeticiones_busqueda; j++) targets[j] = arr[rand() % n].id;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaSecuencial(arr, n, targets[j]); end = clock();
+        t_seq_prom = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaBinariaRecursiva(arr, 0, n-1, targets[j]); end = clock();
+        t_bin_prom = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaExponencial(arr, n, targets[j]); end = clock();
+        t_exp_prom = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        start = clock(); for(int j=0; j<repeticiones_busqueda; j++) busquedaInterpolacion(arr, n, targets[j]); end = clock();
+        t_int_prom = ((double)(end - start) / CLOCKS_PER_SEC) / repeticiones_busqueda;
+
+        fprintf(f_search, "%d,PROMEDIO,%.10f,%.10f,%.10f,%.10f\n", n, t_seq_prom, t_bin_prom, t_exp_prom, t_int_prom);
+        free(targets);
         free(copia);
     }
 

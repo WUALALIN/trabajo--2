@@ -17,7 +17,7 @@ void help() {
     printf("%s- generar <n>: %sGenera un archivo con n deportistas aleatorios.\n", VERDE, RESET);
     printf("%s- cargar <archivo>: %sCarga los datos de deportistas desde el archivo.\n", VERDE, RESET);
     printf("%s- ordenar <algoritmo>: %sOrdena los datos (bubble, insertion, selection, cocktail).\n", VERDE, RESET);
-    printf("%s- busqueda <algoritmo>: %sBusca a un deportista por su ID (secuencial o binaria).\n", VERDE, RESET);
+    printf("%s- busqueda <algoritmo>: %sBusca (secuencial, binaria, recursiva, rango, exponencial, interpolacion).\n", VERDE, RESET);
     printf("%s- ranking <n>: %sMuestra el top N de los deportistas usando el puntaje.\n", VERDE, RESET);
     printf("%s- experimento: %sMide tiempos de algoritmos y exporta CSV.\n", VERDE, RESET);
     printf("%s- guardar [archivo]: %sGuarda datos en CSV.\n", VERDE, RESET);
@@ -254,7 +254,7 @@ void busquedaBinaria(Deportista *arreglo, int cantidad, int idBuscar) {
     if (!encontrado) printf("%sNo se encontro el ID '%d'. ¿Esta ordenado por ID?%s\n", ROJO, idBuscar, RESET);
 }
 
-// --- LOGICA DE EXPERIMENTO ---
+// --- LOGICA DE EXPERIMENTO (Ordenamiento) ---
 typedef struct {
     int n;
     double time_bubble;
@@ -325,4 +325,105 @@ void ejecutarExperimento() {
     }
     fclose(f);
     printf("%sExperimento finalizado. Datos exportados a tiempos_ordenamiento.csv%s\n", VERDE, RESET);
+}
+
+// --- IMPLEMENTACIÓN DE NUEVAS BÚSQUEDAS ---
+
+void imprimirResultadoBusqueda(Deportista *arr, int indice, int valorBuscado, const char* algoritmo) {
+    if (indice != -1) {
+        printf("\n%s[RESULTADO ENCONTRADO - %s]%s\n", VERDE, algoritmo, RESET);
+        printf("ID: %-5d | Nombre: %-15s | Equipo: %-15s | Puntaje: %.2f | Comp: %d\n", 
+               arr[indice].id, arr[indice].nombre, arr[indice].equipo, arr[indice].puntaje, arr[indice].competencias);
+    } else {
+        printf("%sNo se encontro el valor '%d' usando %s.%s\n", ROJO, valorBuscado, algoritmo, RESET);
+    }
+}
+
+// 1. Búsqueda Binaria Recursiva
+int busquedaBinariaRecursiva(Deportista *arr, int inicio, int fin, int idBuscar) {
+    if (inicio <= fin) {
+        int medio = inicio + (fin - inicio) / 2;
+        if (arr[medio].id == idBuscar) return medio;
+        if (arr[medio].id > idBuscar) return busquedaBinariaRecursiva(arr, inicio, medio - 1, idBuscar);
+        return busquedaBinariaRecursiva(arr, medio + 1, fin, idBuscar);
+    }
+    return -1;
+}
+
+// 2. Búsqueda Binaria de Rangos (Por Competencias, para ver repetidos)
+void busquedaBinariaRango(Deportista *arr, int n, int competenciasBuscar) {
+    int inicio = 0, fin = n - 1, primeraPos = -1, ultimaPos = -1;
+
+    // Buscar primera posición
+    while (inicio <= fin) {
+        int medio = inicio + (fin - inicio) / 2;
+        if (arr[medio].competencias == competenciasBuscar) {
+            primeraPos = medio;
+            fin = medio - 1; // Seguimos buscando hacia la izquierda
+        } else if (arr[medio].competencias < competenciasBuscar) {
+            inicio = medio + 1;
+        } else {
+            fin = medio - 1;
+        }
+    }
+
+    // Buscar última posición
+    inicio = 0; fin = n - 1;
+    while (inicio <= fin) {
+        int medio = inicio + (fin - inicio) / 2;
+        if (arr[medio].competencias == competenciasBuscar) {
+            ultimaPos = medio;
+            inicio = medio + 1; // Seguimos buscando hacia la derecha
+        } else if (arr[medio].competencias < competenciasBuscar) {
+            inicio = medio + 1;
+        } else {
+            fin = medio - 1;
+        }
+    }
+
+    if (primeraPos != -1) {
+        printf("%s[RANGO ENCONTRADO]%s El valor de competencias %d aparece desde el índice %d hasta el %d.\n", 
+               VERDE, RESET, competenciasBuscar, primeraPos, ultimaPos);
+        printf("Total de deportistas con %d competencias: %d\n", competenciasBuscar, (ultimaPos - primeraPos) + 1);
+    } else {
+        printf("%sNo se encontraron deportistas con %d competencias.%s\n", ROJO, competenciasBuscar, RESET);
+    }
+}
+
+// 3. Búsqueda Exponencial
+int busquedaExponencial(Deportista *arr, int n, int idBuscar) {
+    if (arr[0].id == idBuscar) return 0;
+    
+    int i = 1;
+    while (i < n && arr[i].id <= idBuscar) {
+        i = i * 2;
+    }
+    
+    // Rango acotado, usamos binaria recursiva
+    int inicio = i / 2;
+    int fin = (i < n - 1) ? i : n - 1;
+    return busquedaBinariaRecursiva(arr, inicio, fin, idBuscar);
+}
+
+// 4. Búsqueda por Interpolación
+int busquedaInterpolacion(Deportista *arr, int n, int idBuscar) {
+    int inicio = 0, fin = n - 1;
+
+    while (inicio <= fin && idBuscar >= arr[inicio].id && idBuscar <= arr[fin].id) {
+        if (inicio == fin) {
+            if (arr[inicio].id == idBuscar) return inicio;
+            return -1;
+        }
+        
+        // Evitar división por cero si todos los IDs son iguales
+        if (arr[fin].id == arr[inicio].id) return -1; 
+
+        // Fórmula de interpolación
+        int pos = inicio + (((double)(fin - inicio) / (arr[fin].id - arr[inicio].id)) * (idBuscar - arr[inicio].id));
+
+        if (arr[pos].id == idBuscar) return pos;
+        if (arr[pos].id < idBuscar) inicio = pos + 1;
+        else fin = pos - 1;
+    }
+    return -1;
 }

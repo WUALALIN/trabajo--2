@@ -30,16 +30,16 @@ int main(void) {
 
         } else if (strcmp(comando, "generar") == 0) {
             if (num_args < 2) {
-            printf("%sUso: generar <n>%s\n", ROJO, RESET); 
-        } else {
-            cantidad_actual = atoi(arg1);
-            // Liberar memoria si ya existía algo previo
-            if (mis_deportistas != NULL) free(mis_deportistas); 
-            
-            generarDatos(&mis_deportistas, &cantidad_actual);
-	    mezclarDatos(mis_deportistas, cantidad_actual);
-            guardarCSV(mis_deportistas, cantidad_actual, "deportistas.csv");
-        }
+                printf("%sUso: generar <n>%s\n", ROJO, RESET); 
+            } else {
+                cantidad_actual = atoi(arg1);
+                // Liberar memoria si ya existía algo previo
+                if (mis_deportistas != NULL) free(mis_deportistas); 
+                
+                generarDatos(&mis_deportistas, &cantidad_actual);
+                mezclarDatos(mis_deportistas, cantidad_actual);
+                guardarCSV(mis_deportistas, cantidad_actual, "deportistas.csv");
+            }
         } 
         else if (strcmp(comando, "cargar") == 0) {
             if (num_args < 2) {
@@ -51,7 +51,6 @@ int main(void) {
                 cargarCSV(&mis_deportistas, &cantidad_actual, arg1);
             }
         } 
-
         else if (strcmp(comando, "ordenar") == 0) {
             if (num_args < 2) {
                 printf("%sUso: ordenar <bubble|insertion|selection|cocktail>%s\n", ROJO, RESET);
@@ -70,23 +69,37 @@ int main(void) {
         } 
         else if (strcmp(comando, "busqueda") == 0) {
             if (num_args < 2) {
-                printf("%sUso: busqueda <secuencial|binaria>%s\n", ROJO, RESET);
+                printf("%sUso: busqueda <secuencial|binaria|recursiva|rango|exponencial|interpolacion>%s\n", ROJO, RESET);
             } else {
-                int idBuscar;
-                printf("%sIngrese el ID a buscar: %s", CYAN, RESET);
-                
-                // Limpiamos el buffer y leemos un número
-                fflush(stdin); 
-                if (scanf("%d", &idBuscar) != 1) {
-                    printf("Error leyendo el ID.\n");
+                int valorBuscar;
+                if (strcmp(arg1, "rango") == 0) {
+                    printf("%sIngrese las COMPETENCIAS a buscar: %s", CYAN, RESET);
+                } else {
+                    printf("%sIngrese el ID a buscar: %s", CYAN, RESET);
                 }
-                getchar(); // Consumir el \n que deja scanf
+                
+                fflush(stdin); 
+                if (scanf("%d", &valorBuscar) != 1) printf("Error leyendo el valor.\n");
+                getchar(); // Consumir el \n
 
                 if (strcmp(arg1, "secuencial") == 0) {
-                    busquedaSecuencial(mis_deportistas, cantidad_actual, idBuscar);
+                    busquedaSecuencial(mis_deportistas, cantidad_actual, valorBuscar);
                 } else if (strcmp(arg1, "binaria") == 0) {
-                    printf("%s[INFO] Asegurese que los datos esten ordenados POR ID.%s\n", AMARILLO, RESET);
-                    busquedaBinaria(mis_deportistas, cantidad_actual, idBuscar);
+                    busquedaBinaria(mis_deportistas, cantidad_actual, valorBuscar);
+                } else if (strcmp(arg1, "recursiva") == 0) {
+                    int pos = busquedaBinariaRecursiva(mis_deportistas, 0, cantidad_actual - 1, valorBuscar);
+                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "BINARIA RECURSIVA");
+                } else if (strcmp(arg1, "rango") == 0) {
+                    printf("%s[INFO] Asegurese que los datos esten ordenados POR COMPETENCIAS (ordenar 5).%s\n", AMARILLO, RESET);
+                    busquedaBinariaRango(mis_deportistas, cantidad_actual, valorBuscar);
+                } else if (strcmp(arg1, "exponencial") == 0) {
+                    int pos = busquedaExponencial(mis_deportistas, cantidad_actual, valorBuscar);
+                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "EXPONENCIAL");
+                } else if (strcmp(arg1, "interpolacion") == 0) {
+                    int pos = busquedaInterpolacion(mis_deportistas, cantidad_actual, valorBuscar);
+                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "INTERPOLACION");
+                } else {
+                    printf("%sAlgoritmo no reconocido.%s\n", ROJO, RESET);
                 }
             }
         }
@@ -127,14 +140,14 @@ int main(void) {
                 printf("------------------------------------------------------------\n");
             }
         }
-	else if (strcmp(comando, "all") == 0 ) {
+        else if (strcmp(comando, "all") == 0 ) {
             mostrarTodo(mis_deportistas, cantidad_actual);
 
         } 
-	else if (strcmp(comando, "experimento") == 0) {
+        else if (strcmp(comando, "experimento") == 0) {
             ejecutarExperimento();
         }
-	else if (strcmp(comando, "guardar") == 0) {
+        else if (strcmp(comando, "guardar") == 0) {
             if (mis_deportistas == NULL || cantidad_actual == 0) {
                 printf("%sError: No hay datos en memoria para guardar. Usa 'generar' primero.%s\n", ROJO, RESET);
             } else { // si no hay nombre de archivo escribimos 
@@ -142,12 +155,12 @@ int main(void) {
                 guardarCSV(mis_deportistas, cantidad_actual, nombre_archivo);
             }
         }
-	else if (strcmp(comando, "exit") == 0) {
+        else if (strcmp(comando, "exit") == 0) {
             finalizar_programa();
             break;
 
         } 
-	else {
+        else {
             printf("%sComando o argumento invalido. Revise la sintaxis.%s\n", ROJO, RESET);
         }
     }
