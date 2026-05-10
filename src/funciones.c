@@ -215,6 +215,8 @@ void cocktailSort(Deportista *a, int n, int criterio) {
     printf("%sOrdenado con Cocktail Shaker Sort.%s\n", VERDE, RESET);
 }
 
+
+
 void busquedaSecuencial(Deportista *arreglo, int cantidad, int idBuscar) {
     if (arreglo == NULL || cantidad == 0) {
         printf("%sError: No hay datos cargados.%s\n", ROJO, RESET);

@@ -4,20 +4,33 @@
 
 # 1. DETECCIÓN DEL SISTEMA OPERATIVO
 ifeq ($(OS),Windows_NT)
-    # Configuración para Windows (CMD)
+   # Windows
     EXE = .exe
-    RM = del /Q /F
-    RMDIR = rmdir /S /Q
-    MKDIR = if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
-    # Comando de limpieza específico para CMD de Windows
-    CLEAN_CMD = if exist $(OBJ_DIR) $(RMDIR) $(OBJ_DIR) & if exist *.exe $(RM) *.exe & if exist *.csv $(RM) *.csv & if exist *.png $(RM) *.png
+
+    RM = del /Q
+    NULLDEV = NUL
+
+    RUN = .\$(BUILD_DIR)\$(TARGET)$(EXE)
+    RUN_BENCH = .\$(BUILD_DIR)\$(BENCHMARK)$(EXE)
+
+    MKDIR_BUILD = if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+    MKDIR_OBJ = if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+    MKDIR_SRC = if not exist $(SRC_DIR) mkdir $(SRC_DIR)
+    MKDIR_INC = if not exist $(INC_DIR) mkdir $(INC_DIR)
+    MKDIR_DB = if not exist $(DB_DIR) mkdir $(DB_DIR)
+    MKDIR_PLOTS = if not exist $(PLOTS_DIR) mkdir $(PLOTS_DIR)
+
 else
-    # Configuración para Linux/macOS (Bash)
+
+    # Linux/macOS
     EXE =
+
     RM = rm -f
-    RMDIR = rm -rf
-    MKDIR = mkdir -p $(OBJ_DIR)
-    CLEAN_CMD = $(RMDIR) $(OBJ_DIR) $(TARGET) $(BENCHMARK) *.csv *.png
+    NULLDEV = /dev/null
+
+    RUN = ./$(BUILD_DIR)/$(TARGET)$(EXE)
+    RUN_BENCH = ./$(BUILD_DIR)/$(BENCHMARK)$(EXE)
+
 endif
 
 # 2. NOMBRES Y DIRECTORIOS
@@ -27,47 +40,113 @@ BENCHMARK = medicion
 SRC_DIR = src
 INC_DIR = include
 OBJ_DIR = obj
+BUILD_DIR = build
+DB_DIR = db
+PLOTS_DIR = plots
 
 # 3. COMPILADOR Y BANDERAS
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -I$(INC_DIR)
+CFLAGS = -Wall -Wextra -std=c11
+INCLUDE = -I$(INC_DIR)
 
-# 4. OBJETOS
-COMMON_OBJS = $(OBJ_DIR)/funciones.o
+# ==========================================
+# ARCHIVOS
+# ==========================================
 
-# --- REGLAS PRINCIPALES ---
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 
-all: folders $(TARGET)$(EXE) $(BENCHMARK)$(EXE)
+OBJ_FILES = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))
+
+# ==========================================
+# REGLAS PRINCIPALES
+# ==========================================
+
+all: folders $(BUILD_DIR)/$(TARGET)$(EXE) $(BUILD_DIR)/$(BENCHMARK)$(EXE)
+
+# Programa principal
+$(BUILD_DIR)/$(TARGET)$(EXE): $(OBJ_DIR)/main.o $(OBJ_DIR)/funciones.o
+	$(CC) $(CFLAGS) -o $@ $^ $(INCLUDE)
+
+# Programa de medición
+$(BUILD_DIR)/$(BENCHMARK)$(EXE): $(OBJ_DIR)/medicion.o $(OBJ_DIR)/funciones.o
+	$(CC) $(CFLAGS) -o $@ $^ $(INCLUDE)
+
+# Compilar objetos
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $< $(INCLUDE)
+
+# ==========================================
+# CARPETAS
+# ==========================================
 
 folders:
-	@$(MKDIR)
 
-# Programa Principal
-$(TARGET)$(EXE): $(OBJ_DIR)/main.o $(COMMON_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+ifeq ($(OS),Windows_NT)
 
-# Programa de Medición
-$(BENCHMARK)$(EXE): $(OBJ_DIR)/medicion.o $(COMMON_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	-@$(MKDIR_SRC) 2> $(NULLDEV)
+	-@$(MKDIR_INC) 2> $(NULLDEV)
+	-@$(MKDIR_OBJ) 2> $(NULLDEV)
+	-@$(MKDIR_BUILD) 2> $(NULLDEV)
+	-@$(MKDIR_DB) 2> $(NULLDEV)
+	-@$(MKDIR_PLOTS) 2> $(NULLDEV)
 
-# Compilación de objetos
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+else
 
-# --- AUTOMATIZACIÓN Y LIMPIEZA ---
+	mkdir -p $(SRC_DIR)
+	mkdir -p $(INC_DIR)
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(BUILD_DIR)
+	mkdir -p $(DB_DIR)
+	mkdir -p $(PLOTS_DIR)
 
-graficos: $(BENCHMARK)$(EXE)
+endif
+
+# ==========================================
+# EJECUCIÓN
+# ==========================================
+
+run: $(BUILD_DIR)/$(TARGET)$(EXE)
+	$(RUN)
+
+benchmark: $(BUILD_DIR)/$(BENCHMARK)$(EXE)
+	$(RUN_BENCH)
+
+# ==========================================
+# GENERAR GRÁFICOS
+# ==========================================
+
+graficos: $(BUILD_DIR)/$(BENCHMARK)$(EXE)
+
 	@echo Ejecutando mediciones...
-	./$(BENCHMARK)$(EXE)
+	$(RUN_BENCH)
+
 	@echo Generando graficos...
 	gnuplot plot_tiempos.gp
 
+# ==========================================
+# LIMPIEZA
+# ==========================================
+
 clean:
-	@echo Limpiando archivos...
-	@$(CLEAN_CMD)
-	@echo Proyecto limpio.
 
-run: $(TARGET)$(EXE)
-	./$(TARGET)$(EXE)
+ifeq ($(OS),Windows_NT)
 
-.PHONY: all clean folders run graficos
+	-$(RM) $(OBJ_DIR)\*.o 2> $(NULLDEV)
+	-$(RM) $(BUILD_DIR)\*.exe 2> $(NULLDEV)
+	-$(RM) $(DB_DIR)\*.csv 2> $(NULLDEV)
+	-$(RM) $(PLOTS_DIR)\*.png 2> $(NULLDEV)
+
+else
+
+	rm -f $(OBJ_DIR)/*.o
+	rm -f $(BUILD_DIR)/*
+	rm -f $(DB_DIR)/*.csv
+	rm -f $(PLOTS_DIR)/*.png
+
+endif
+
+# ==========================================
+# PHONY
+# ==========================================
+
+.PHONY: all clean folders run benchmark graficos
