@@ -29,7 +29,7 @@ void busquedaBinaria(Deportista *arreglo, int cantidad, int idBuscar);
 
 // --- Nuevas Búsquedas ---
 int busquedaBinariaRecursiva(Deportista *arr, int inicio, int fin, int idBuscar);
-void busquedaBinariaRango(Deportista *arr, int n, int competenciasBuscar);
+void busquedaBinariaRango(Deportista *arr, int n, float puntajeMin, float puntajeMax);
 int busquedaExponencial(Deportista *arr, int n, int idBuscar);
 int busquedaInterpolacion(Deportista *arr, int n, int idBuscar);
 
