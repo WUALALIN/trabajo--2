@@ -71,35 +71,41 @@ int main(void) {
             if (num_args < 2) {
                 printf("%sUso: busqueda <secuencial|binaria|recursiva|rango|exponencial|interpolacion>%s\n", ROJO, RESET);
             } else {
-                int valorBuscar;
                 if (strcmp(arg1, "rango") == 0) {
-                    printf("%sIngrese las COMPETENCIAS a buscar: %s", CYAN, RESET);
-                } else {
-                    printf("%sIngrese el ID a buscar: %s", CYAN, RESET);
-                }
-                
-                fflush(stdin); 
-                if (scanf("%d", &valorBuscar) != 1) printf("Error leyendo el valor.\n");
-                getchar(); // Consumir el \n
+                    float min, max;
+                    printf("%s[INFO] Asegurese que los datos esten ordenados POR PUNTAJE (ordenar 4).%s\n", AMARILLO, RESET);
+                    printf("%sIngrese el puntaje minimo: %s", CYAN, RESET);
+                    if (scanf("%f", &min) != 1) printf("Error leyendo el valor.\n");
+                    
+                    printf("%sIngrese el puntaje maximo: %s", CYAN, RESET);
+                    if (scanf("%f", &max) != 1) printf("Error leyendo el valor.\n");
+                    getchar(); // Consumir el \n
 
-                if (strcmp(arg1, "secuencial") == 0) {
-                    busquedaSecuencial(mis_deportistas, cantidad_actual, valorBuscar);
-                } else if (strcmp(arg1, "binaria") == 0) {
-                    busquedaBinaria(mis_deportistas, cantidad_actual, valorBuscar);
-                } else if (strcmp(arg1, "recursiva") == 0) {
-                    int pos = busquedaBinariaRecursiva(mis_deportistas, 0, cantidad_actual - 1, valorBuscar);
-                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "BINARIA RECURSIVA");
-                } else if (strcmp(arg1, "rango") == 0) {
-                    printf("%s[INFO] Asegurese que los datos esten ordenados POR COMPETENCIAS (ordenar 5).%s\n", AMARILLO, RESET);
-                    busquedaBinariaRango(mis_deportistas, cantidad_actual, valorBuscar);
-                } else if (strcmp(arg1, "exponencial") == 0) {
-                    int pos = busquedaExponencial(mis_deportistas, cantidad_actual, valorBuscar);
-                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "EXPONENCIAL");
-                } else if (strcmp(arg1, "interpolacion") == 0) {
-                    int pos = busquedaInterpolacion(mis_deportistas, cantidad_actual, valorBuscar);
-                    imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "INTERPOLACION");
+                    busquedaBinariaRango(mis_deportistas, cantidad_actual, min, max);
+
                 } else {
-                    printf("%sAlgoritmo no reconocido.%s\n", ROJO, RESET);
+                    int valorBuscar;
+                    printf("%sIngrese el ID a buscar: %s", CYAN, RESET);
+                    fflush(stdin); 
+                    if (scanf("%d", &valorBuscar) != 1) printf("Error leyendo el valor.\n");
+                    getchar(); // Consumir el \n
+
+                    if (strcmp(arg1, "secuencial") == 0) {
+                        busquedaSecuencial(mis_deportistas, cantidad_actual, valorBuscar);
+                    } else if (strcmp(arg1, "binaria") == 0) {
+                        busquedaBinaria(mis_deportistas, cantidad_actual, valorBuscar);
+                    } else if (strcmp(arg1, "recursiva") == 0) {
+                        int pos = busquedaBinariaRecursiva(mis_deportistas, 0, cantidad_actual - 1, valorBuscar);
+                        imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "BINARIA RECURSIVA");
+                    } else if (strcmp(arg1, "exponencial") == 0) {
+                        int pos = busquedaExponencial(mis_deportistas, cantidad_actual, valorBuscar);
+                        imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "EXPONENCIAL");
+                    } else if (strcmp(arg1, "interpolacion") == 0) {
+                        int pos = busquedaInterpolacion(mis_deportistas, cantidad_actual, valorBuscar);
+                        imprimirResultadoBusqueda(mis_deportistas, pos, valorBuscar, "INTERPOLACION");
+                    } else {
+                        printf("%sAlgoritmo no reconocido.%s\n", ROJO, RESET);
+                    }
                 }
             }
         }

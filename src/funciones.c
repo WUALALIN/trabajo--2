@@ -215,8 +215,6 @@ void cocktailSort(Deportista *a, int n, int criterio) {
     printf("%sOrdenado con Cocktail Shaker Sort.%s\n", VERDE, RESET);
 }
 
-
-
 void busquedaSecuencial(Deportista *arreglo, int cantidad, int idBuscar) {
     if (arreglo == NULL || cantidad == 0) {
         printf("%sError: No hay datos cargados.%s\n", ROJO, RESET);
@@ -352,43 +350,56 @@ int busquedaBinariaRecursiva(Deportista *arr, int inicio, int fin, int idBuscar)
     return -1;
 }
 
-// 2. Búsqueda Binaria de Rangos (Por Competencias, para ver repetidos)
-void busquedaBinariaRango(Deportista *arr, int n, int competenciasBuscar) {
-    int inicio = 0, fin = n - 1, primeraPos = -1, ultimaPos = -1;
+// 2. Búsqueda Binaria de Rangos (Por Puntaje, para determinar límites)
+void busquedaBinariaRango(Deportista *arr, int n, float puntajeMin, float puntajeMax) {
+    if (puntajeMin > puntajeMax) {
+        printf("%sError: El puntaje mínimo no puede ser mayor al máximo.%s\n", ROJO, RESET);
+        return;
+    }
 
-    // Buscar primera posición
+    int inicio = 0, fin = n - 1;
+    int primeraPos = -1, ultimaPos = -1;
+
+    // Buscar primera posición (puntaje >= puntajeMin)
     while (inicio <= fin) {
         int medio = inicio + (fin - inicio) / 2;
-        if (arr[medio].competencias == competenciasBuscar) {
+        if (arr[medio].puntaje >= puntajeMin) {
             primeraPos = medio;
-            fin = medio - 1; // Seguimos buscando hacia la izquierda
-        } else if (arr[medio].competencias < competenciasBuscar) {
-            inicio = medio + 1;
+            fin = medio - 1; // Seguimos buscando hacia la izquierda por si hay un puntaje válido menor
         } else {
-            fin = medio - 1;
+            inicio = medio + 1;
         }
     }
 
-    // Buscar última posición
-    inicio = 0; fin = n - 1;
+    // Buscar última posición (puntaje <= puntajeMax)
+    inicio = 0; 
+    fin = n - 1;
     while (inicio <= fin) {
         int medio = inicio + (fin - inicio) / 2;
-        if (arr[medio].competencias == competenciasBuscar) {
+        if (arr[medio].puntaje <= puntajeMax) {
             ultimaPos = medio;
-            inicio = medio + 1; // Seguimos buscando hacia la derecha
-        } else if (arr[medio].competencias < competenciasBuscar) {
-            inicio = medio + 1;
+            inicio = medio + 1; // Seguimos buscando hacia la derecha por si hay un puntaje válido mayor
         } else {
             fin = medio - 1;
         }
     }
 
-    if (primeraPos != -1) {
-        printf("%s[RANGO ENCONTRADO]%s El valor de competencias %d aparece desde el índice %d hasta el %d.\n", 
-               VERDE, RESET, competenciasBuscar, primeraPos, ultimaPos);
-        printf("Total de deportistas con %d competencias: %d\n", competenciasBuscar, (ultimaPos - primeraPos) + 1);
+    // Verificar si se encontró un rango válido
+    if (primeraPos != -1 && ultimaPos != -1 && primeraPos <= ultimaPos) {
+        printf("%s[RANGO ENCONTRADO]%s Deportistas con puntaje entre %.2f y %.2f:\n", 
+               VERDE, RESET, puntajeMin, puntajeMax);
+        printf("Aparecen desde el índice %d hasta el %d.\n", primeraPos, ultimaPos);
+        printf("Total de deportistas en este rango: %d\n", (ultimaPos - primeraPos) + 1);
+        printf("------------------------------------------------------------\n");
+        // Mostrar los deportistas en el rango (opcional, pero útil)
+        for (int i = primeraPos; i <= ultimaPos; i++) {
+            printf("ID: %-5d | Nombre: %-15s | Equipo: %-15s | Puntaje: %.2f | Comp: %d\n", 
+               arr[i].id, arr[i].nombre, arr[i].equipo, arr[i].puntaje, arr[i].competencias);
+        }
+        printf("------------------------------------------------------------\n");
     } else {
-        printf("%sNo se encontraron deportistas con %d competencias.%s\n", ROJO, competenciasBuscar, RESET);
+        printf("%sNo se encontraron deportistas en el rango de puntaje de %.2f a %.2f.%s\n", 
+               ROJO, puntajeMin, puntajeMax, RESET);
     }
 }
 
