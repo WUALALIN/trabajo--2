@@ -5,6 +5,7 @@
 #include "deportista.h"
 #include "funciones.h"
 #include "interfaz.h"
+#include "ordenamiento.h"
 
 int main(void) {
     char linea[256];
@@ -53,17 +54,39 @@ int main(void) {
         } 
         else if (strcmp(comando, "ordenar") == 0) {
             if (num_args < 2) {
-                printf("%sUso: ordenar <bubble|insertion|selection|cocktail>%s\n", ROJO, RESET);
+                printf("%sUso: ordenar <bubble|insertion|selection|cocktail|merge|mergeopt|qs_u|qs_p|qs_r|qs_m>%s\n", ROJO, RESET);
             } else {
                 int criterio;
                 printf("Elija campo (1:ID, 2:Nombre, 3:Equipo, 4:Puntaje, 5:Competencias): ");
                 scanf("%d", &criterio);
-                getchar(); // Consumir salto de linea
+                getchar();
 
                 if (strcmp(arg1, "bubble") == 0) bubbleSort(mis_deportistas, cantidad_actual, criterio);
                 else if (strcmp(arg1, "insertion") == 0) insertionSort(mis_deportistas, cantidad_actual, criterio);
                 else if (strcmp(arg1, "selection") == 0) selectionSort(mis_deportistas, cantidad_actual, criterio);
                 else if (strcmp(arg1, "cocktail") == 0) cocktailSort(mis_deportistas, cantidad_actual, criterio);
+                else if (strcmp(arg1, "merge") == 0) {
+                    mergeSort(mis_deportistas, cantidad_actual, criterio);
+                }
+                else if (strcmp(arg1, "mergeopt") == 0) {
+                    int umbral;
+                    printf("Ingrese umbral (recomendado 8-32, default 16): ");
+                    scanf("%d", &umbral);
+                    getchar(); 
+                    mergeSortOpt(mis_deportistas, cantidad_actual, criterio, umbral);
+                }
+                else if (strcmp(arg1, "qs_u") == 0) {
+                    quickSort(mis_deportistas, cantidad_actual, criterio, 'u');
+                }
+                else if (strcmp(arg1, "qs_p") == 0) {
+                    quickSort(mis_deportistas, cantidad_actual, criterio, 'p');
+                }
+                else if (strcmp(arg1, "qs_r") == 0) {
+                    quickSort(mis_deportistas, cantidad_actual, criterio, 'r');
+                }
+                else if (strcmp(arg1, "qs_m") == 0) {
+                    quickSort(mis_deportistas, cantidad_actual, criterio, 'm');
+                }
                 else printf("%sAlgoritmo no reconocido.%s\n", ROJO, RESET);
             }
         } 
@@ -151,7 +174,10 @@ int main(void) {
 
         } 
         else if (strcmp(comando, "experimento") == 0) {
-            ejecutarExperimento();
+            if (num_args > 1 && strcmp(arg1, "t2") == 0)
+                ejecutarExperimentoT2();
+            else
+                ejecutarExperimento();
         }
         else if (strcmp(comando, "guardar") == 0) {
             if (mis_deportistas == NULL || cantidad_actual == 0) {
