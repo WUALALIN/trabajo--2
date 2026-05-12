@@ -40,4 +40,8 @@ void imprimirResultadoBusqueda(Deportista *arr, int indice, int valorBuscado, co
 void copiarArreglo(Deportista *origen, Deportista *destino, int n);
 void ejecutarExperimento();
 
+void mergeSort(Deportista *a, int n, int criterio);
+void mergeSortOpt(Deportista *a, int n, int criterio, int umbral);
+void quickSort(Deportista *a, int n, int criterio, char pivote);
+void ejecutarExperimentoT2();
 #endif
