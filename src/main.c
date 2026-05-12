@@ -6,6 +6,7 @@
 #include "funciones.h"
 #include "interfaz.h"
 #include "ordenamiento.h"
+#include "selection.h"
 
 int main(void) {
     char linea[256];
@@ -174,10 +175,27 @@ int main(void) {
 
         } 
         else if (strcmp(comando, "experimento") == 0) {
-            if (num_args > 1 && strcmp(arg1, "t2") == 0)
-                ejecutarExperimentoT2();
-            else
+            int option;
+            printf("Elige que experimento realizar: \n");
+            printf("1.- Experimento n°1\n");
+            printf("2.- Experimento n°2\n");
+            printf("3.- Quick Select\n");
+            scanf("%d", &option);
+
+            switch (option)
+            {
+            case 1:
                 ejecutarExperimento();
+                break;
+            
+            case 2:
+                ejecutarExperimentoT2();
+                break;
+
+            case 3:
+                ejecutarExperimentoT3();
+                break;
+            }
         }
         else if (strcmp(comando, "guardar") == 0) {
             if (mis_deportistas == NULL || cantidad_actual == 0) {
