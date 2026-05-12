@@ -197,6 +197,17 @@ int main(void) {
                 break;
             }
         }
+        else if (strcmp(comando, "top_n") == 0) {
+            int n, tamaño;
+            printf("Ingresa cantidad de deportistas a crear: \n");
+            scanf("%d", &tamaño);
+            printf("Ingresa el 'n': \n");
+            scanf("%d", &n);
+            Deportista *arreglo = NULL;
+            generarDatos(&arreglo, &n);
+            top_n_deportistas(arreglo, sizeof(arreglo-1), n);
+            free(arreglo);
+        }
         else if (strcmp(comando, "guardar") == 0) {
             if (mis_deportistas == NULL || cantidad_actual == 0) {
                 printf("%sError: No hay datos en memoria para guardar. Usa 'generar' primero.%s\n", ROJO, RESET);

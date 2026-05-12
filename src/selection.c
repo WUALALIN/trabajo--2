@@ -174,3 +174,31 @@ void ejecutarExperimentoT3() {
     fclose(f);
     printf("%sExperimento finalizado. Datos exportados a tiempos_quickSelect.csv%s\n", VERDE, RESET);
 }
+
+// comparación para qsort (orden descendente)
+int comparar_desc(const void *a, const void *b) {
+    Deportista *d1 = (Deportista *)a;
+    Deportista *d2 = (Deportista *)b;
+    return d2->puntaje - d1->puntaje;
+}
+
+Deportista* top_n_deportistas(Deportista arr[], int n_total, int N) {
+    if (N > n_total) N = n_total;
+
+    int indice = n_total - N;
+
+    quick_select_mediana3(arr, 0, n_total - 1, indice);
+
+    // reservar memoria para el resultado
+    Deportista *top = malloc(N * sizeof(Deportista));
+
+    // copiar los N mejores
+    for (int i = 0; i < N; i++) {
+        top[i] = arr[indice + i];
+    }
+
+    // ordenar el top N
+    qsort(top, N, sizeof(Deportista), comparar_desc);
+
+    return top;
+}
