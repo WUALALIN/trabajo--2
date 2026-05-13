@@ -40,7 +40,7 @@ int main(void) {
                 
                 generarDatos(&mis_deportistas, &cantidad_actual);
                 mezclarDatos(mis_deportistas, cantidad_actual);
-                guardarCSV(mis_deportistas, cantidad_actual, "deportistas.csv");
+                guardarCSV(mis_deportistas, cantidad_actual, "db/deportistas.csv");
             }
         } 
         else if (strcmp(comando, "cargar") == 0) {
@@ -132,7 +132,7 @@ int main(void) {
                     }
                 }
             }
-        }
+        }/*
         else if (strcmp(comando, "ranking") == 0 ) {
             if (num_args < 2) {
                 printf("%sUso: ranking <N> (ej: ranking 5)%s\n", ROJO, RESET);
@@ -169,9 +169,20 @@ int main(void) {
                 }
                 printf("------------------------------------------------------------\n");
             }
-        }
+        }*/
         else if (strcmp(comando, "all") == 0 ) {
             mostrarTodo(mis_deportistas, cantidad_actual);
+
+        } 
+        else if (strcmp(comando, "mostrar") == 0 ) {
+            if (num_args < 2) {
+                printf("%sUso: mostrar <n>%s\n", ROJO, RESET); 
+            } 
+            else {
+                int n = atoi(arg1);
+                Deportista k = k_esimo_mejor(mis_deportistas, cantidad_actual, n);
+                printf("El %d° mejor es: %s con %.2f puntos\n", n, k.nombre, k.puntaje);
+            }
 
         } 
         else if (strcmp(comando, "experimento") == 0) {
@@ -182,31 +193,31 @@ int main(void) {
             printf("3.- Quick Select\n");
             scanf("%d", &option);
 
-            switch (option)
-            {
-            case 1:
+            if (option == 1){
                 ejecutarExperimento();
-                break;
-            
-            case 2:
-                ejecutarExperimentoT2();
-                break;
-
-            case 3:
-                ejecutarExperimentoT3();
-                break;
             }
+            else if(option == 2){
+                ejecutarExperimentoT2();
+            }
+            else if(option == 3){
+                ejecutarExperimentoT3();
+            }
+
         }
-        else if (strcmp(comando, "top_n") == 0) {
-            int n, tamaño;
-            printf("Ingresa cantidad de deportistas a crear: \n");
-            scanf("%d", &tamaño);
-            printf("Ingresa el 'n': \n");
-            scanf("%d", &n);
-            Deportista *arreglo = NULL;
-            generarDatos(&arreglo, &n);
-            top_n_deportistas(arreglo, sizeof(arreglo-1), n);
-            free(arreglo);
+        else if (strcmp(comando, "ranking") == 0) {
+            if (num_args < 2) {
+                printf("%sUso: ranking <n>%s\n", ROJO, RESET); 
+            } 
+            else {
+                int n = atoi(arg1);
+                Deportista *top = top_n_deportistas(mis_deportistas, cantidad_actual, n);
+                printf("==========================================\n");
+                printf("Ranking de los %d mejores deportistas.\n", n);
+                printf("==========================================\n");
+                for (int i = 0; i < n; i++) {
+                    printf("%d) %s - %.2f\n", i+1, top[i].nombre, top[i].puntaje);
+                }
+            }
         }
         else if (strcmp(comando, "guardar") == 0) {
             if (mis_deportistas == NULL || cantidad_actual == 0) {

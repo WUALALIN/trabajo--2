@@ -15,4 +15,10 @@ Deportista quick_select_mediana3(Deportista arr[], int izquierda, int derecha, i
 
 void ejecutarExperimentoT3();
 
+int comparar_desc(const void *a, const void *b);
+
+Deportista* top_n_deportistas(Deportista arr[], int n_total, int N);
+
+Deportista k_esimo_mejor(Deportista arr[], int n, int k);
+
 #endif

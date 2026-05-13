@@ -18,9 +18,10 @@ void help() {
     printf("%s- cargar <archivo>: %sCarga los datos de deportistas desde el archivo.\n", VERDE, RESET);
     printf("%s- ordenar <algoritmo>: %sOrdena los datos (bubble, insertion, selection, cocktail).\n", VERDE, RESET);
     printf("%s- busqueda <algoritmo>: %sBusca (secuencial, binaria, recursiva, rango, exponencial, interpolacion).\n", VERDE, RESET);
-    printf("%s- ranking <n>: %sMuestra el top N de los deportistas usando el puntaje.\n", VERDE, RESET);
+    // printf("%s- ranking <n>: %sMuestra el top N de los deportistas usando el puntaje.\n", VERDE, RESET);
     printf("%s- experimento: %sMide tiempos de algoritmos y exporta CSV. Ordenamiento o Busqueda.\n", VERDE, RESET);
-    printf("%s- top_n: %sMuestra el top 'n' de un arreglo de tamaño dado.\n", VERDE, RESET);
+    printf("%s- ranking <n>: %sMuestra el top 'n' de los deportistas usando el puntaje.\n", VERDE, RESET);
+    printf("%s- mostrar <n>: %sMuestra el k-esimo mejor deportista usando el puntaje.\n", VERDE, RESET);
     printf("%s- guardar [archivo]: %sGuarda datos en CSV.\n", VERDE, RESET);
     printf("%s- all: %sMuestra todos los deportistas cargados.\n", VERDE, RESET);
     printf("%s- exit: %sSale del programa.\n", VERDE, RESET);

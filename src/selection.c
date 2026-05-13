@@ -124,11 +124,16 @@ typedef struct {
 
 
 void ejecutarExperimentoT3() {
-    int valores_n[] = {100, 500, 1000, 2000, 5000, 10000};
-    int num_values = 6;
-    int repeticiones = 5; 
+    int valores_n[] = {
+    5000, 10000, 15000, 20000, 25000,
+    30000, 35000, 40000, 45000, 50000,
+    55000, 60000, 65000, 70000, 75000,
+    80000, 85000, 90000, 95000, 100000
+    };
+    int num_values = 20;
+    int repeticiones = 10; 
 
-    ExecResult1 resultados[6];
+    ExecResult1 resultados[20];
     
     printf("\n%sIniciando experimento de medicion de tiempos (%d repeticiones)...%s\n", AMARILLO, repeticiones, RESET);
 
@@ -143,7 +148,7 @@ void ejecutarExperimentoT3() {
 
         srand(time(NULL));
         int k = rand() % n;
-
+        printf("Posicion a encontrar: %d\n", k);
         for (int r = 0; r < repeticiones; r++) {
             mezclarDatos(datos_base, n); 
             clock_t ini, fin;
@@ -177,9 +182,12 @@ void ejecutarExperimentoT3() {
 
 // comparación para qsort (orden descendente)
 int comparar_desc(const void *a, const void *b) {
-    Deportista *d1 = (Deportista *)a;
-    Deportista *d2 = (Deportista *)b;
-    return d2->puntaje - d1->puntaje;
+    double p1 = ((Deportista *)a)->puntaje;
+    double p2 = ((Deportista *)b)->puntaje;
+
+    if (p1 < p2) return 1; 
+    if (p1 > p2) return -1;  
+    return 0;
 }
 
 Deportista* top_n_deportistas(Deportista arr[], int n_total, int N) {
@@ -199,6 +207,16 @@ Deportista* top_n_deportistas(Deportista arr[], int n_total, int N) {
 
     // ordenar el top N
     qsort(top, N, sizeof(Deportista), comparar_desc);
-
     return top;
+}
+
+Deportista k_esimo_mejor(Deportista arr[], int n, int k) {
+    if (k < 1 || k > n) {
+        Deportista vacio = {"", -1}; // manejo simple de error
+        return vacio;
+    }
+
+    int indice = n - k;
+
+    return quick_select(arr, 0, n - 1, indice);
 }
