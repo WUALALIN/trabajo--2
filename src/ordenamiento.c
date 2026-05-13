@@ -8,7 +8,7 @@
 #include "interfaz.h"
 #include "ordenamiento.h"
 
-//AUXILIARES
+// AUXILIARES
 
 void swap(Deportista *a, int i, int j) {
     Deportista tmp = a[i];
@@ -16,7 +16,7 @@ void swap(Deportista *a, int i, int j) {
     a[j] = tmp;
 }
 
-// Fusiona dos mitades ordenadas en su lugar usando buffers temporales 
+// Fusiona dos mitades ordenadas usando buffers temporales
 void merge(Deportista *a, int inicio, int medio, int fin, int criterio) {
     int izq_n = medio - inicio + 1;
     int der_n = fin - medio;
@@ -51,7 +51,7 @@ void insertionSortRango(Deportista *a, int inicio, int fin, int criterio) {
     }
 }
 
- // MERGE SORT CLASICO
+// MERGE SORT CLASICO
 
 void mergeSortRec(Deportista *a, int inicio, int fin, int criterio) {
     if (inicio >= fin) return;
@@ -69,9 +69,8 @@ void mergeSort(Deportista *a, int n, int criterio) {
 
 // MERGE SORT OPTIMIZADO
 
-
 void mergeSortOptRec(Deportista *a, int inicio, int fin, int criterio, int umbral) {
-    // Subarreglo pequeño: Insertion Sort es mas eficiente 
+    // Subarreglo pequeño: Insertion Sort es mas eficiente
     if (fin - inicio + 1 <= umbral) {
         insertionSortRango(a, inicio, fin, criterio);
         return;
@@ -89,21 +88,21 @@ void mergeSortOpt(Deportista *a, int n, int criterio, int umbral) {
     printf("%sOrdenado con Merge Sort optimizado (umbral=%d).%s\n", VERDE, umbral, RESET);
 }
 
- // QUICK SORT LOMUTO
+// QUICK SORT LOMUTO
 
-// Coloca el pivote elegido en a[fin] para que Lomuto lo tome desde ahi 
+// Coloca el pivote elegido en a[fin] para que Lomuto lo tome desde ahi
 void elegirPivote(Deportista *a, int inicio, int fin, int criterio, char pivote) {
     int medio = inicio + (fin - inicio) / 2;
     int idx;
 
     switch (pivote) {
-        case 'u': break; // ultimo: ya esta en fin 
-        case 'p': swap(a, inicio, fin); break; // primero: mover al fin 
+        case 'u': break; // ultimo: ya esta en fin
+        case 'p': swap(a, inicio, fin); break; // primero: mover al fin
         case 'r': // aleatorio
             idx = inicio + rand() % (fin - inicio + 1);
             swap(a, idx, fin);
             break;
-        case 'm': // mediana de tres 
+        case 'm': // mediana de tres
             if (comparar(a[inicio], a[medio], criterio) > 0) swap(a, inicio, medio);
             if (comparar(a[inicio], a[fin],   criterio) > 0) swap(a, inicio, fin);
             if (comparar(a[medio],  a[fin],   criterio) > 0) swap(a, medio,  fin);
@@ -151,43 +150,59 @@ void quickSort(Deportista *a, int n, int criterio, char pivote) {
     printf("%sOrdenado con Quick Sort Lomuto (pivote: %s).%s\n", VERDE, nom, RESET);
 }
 
-
- // Experimento de tiempos
- 
+// EXPERIMENTO DE TIEMPOS T2
 
 void ejecutarExperimentoT2() {
     int valores_n[]  = {100, 500, 1000, 2000, 5000, 10000};
     int num_vals     = 6;
     int repeticiones = 5;
-    int umbral_opt   = 16;
+
+    // Umbrales a comparar para Merge Sort optimizado
+    int umbrales[]   = {8, 16, 32};
+    int num_umbrales = 3;
 
     printf("\n%s[EXPERIMENTO T2] Divide y Venceras (%d repeticiones)...%s\n",
            AMARILLO, repeticiones, RESET);
 
-    FILE *f = fopen("db/tiempos_t2.csv", "w");
-    if (!f) {
-        f = fopen("tiempos_t2.csv", "w");
-        if (!f) {
-            printf("%sError: no se pudo crear tiempos_t2.csv%s\n", ROJO, RESET);
-            return;
-        }
-        printf("%s[AVISO] Carpeta db/ no encontrada, guardando en directorio actual.%s\n", AMARILLO, RESET);
-    }
+    // CSV 1: caso promedio de todos los algoritmos 
+    FILE *f1 = fopen("db/tiempos_t2_promedio.csv", "w");
+    if (!f1) f1 = fopen("tiempos_t2_promedio.csv", "w");
+    if (!f1) { printf("%sError creando CSV promedio%s\n", ROJO, RESET); return; }
 
-    fprintf(f, "n,merge_clasico,merge_opt%d,qs_ultimo,qs_primero,qs_aleatorio,qs_mediana,qs_peor_ultimo\n", umbral_opt);
+    fprintf(f1, "n,merge_clasico,merge_opt8,merge_opt16,merge_opt32,"
+                "qs_ultimo,qs_primero,qs_aleatorio,qs_mediana\n");
+
+    // CSV 2: peor caso de cada variante de Quick Sort (arreglo ordenado) 
+    FILE *f2 = fopen("db/tiempos_t2_peor.csv", "w");
+    if (!f2) f2 = fopen("tiempos_t2_peor.csv", "w");
+    if (!f2) { printf("%sError creando CSV peor caso%s\n", ROJO, RESET); fclose(f1); return; }
+
+    fprintf(f2, "n,qs_peor_ultimo,qs_peor_primero,qs_peor_aleatorio,qs_peor_mediana\n");
+
+    // CSV 3: mejor caso de Quick Sort (arreglo ordenado inversamente para mediana, aleatorio para otros) 
+    FILE *f3 = fopen("db/tiempos_t2_mejor.csv", "w");
+    if (!f3) f3 = fopen("tiempos_t2_mejor.csv", "w");
+    if (!f3) { printf("%sError creando CSV mejor caso%s\n", ROJO, RESET); fclose(f1); fclose(f2); return; }
+
+    fprintf(f3, "n,merge_clasico,qs_ultimo,qs_primero,qs_aleatorio,qs_mediana\n");
 
     srand((unsigned)time(NULL));
 
     for (int i = 0; i < num_vals; i++) {
         int n = valores_n[i];
-        double t_mc = 0, t_mo = 0, t_qu = 0, t_qp = 0, t_qr = 0, t_qm = 0, t_qpeor = 0;
+
+        double t_mc = 0;
+        double t_mo[3] = {0, 0, 0}; // umbrales 8, 16, 32
+        double t_qu = 0, t_qp = 0, t_qr = 0, t_qm = 0;
+        double t_peor_u = 0, t_peor_p = 0, t_peor_r = 0, t_peor_m = 0;
+        double t_mejor_mc = 0, t_mejor_u = 0, t_mejor_p = 0, t_mejor_r = 0, t_mejor_m = 0;
 
         Deportista *base = NULL;
         generarDatos(&base, &n);
         Deportista *copia = (Deportista *)malloc(n * sizeof(Deportista));
         if (!base || !copia) { free(base); free(copia); continue; }
 
-        // Caso promedio: datos mezclados, 5 repeticiones 
+        // CASO PROMEDIO: datos mezclados, 5 repeticiones 
         for (int r = 0; r < repeticiones; r++) {
             mezclarDatos(base, n);
             clock_t ini, fin_t;
@@ -196,9 +211,11 @@ void ejecutarExperimentoT2() {
             ini = clock(); mergeSortRec(copia, 0, n-1, 4); fin_t = clock();
             t_mc += (double)(fin_t - ini) / CLOCKS_PER_SEC;
 
-            copiarArreglo(base, copia, n);
-            ini = clock(); mergeSortOptRec(copia, 0, n-1, 4, umbral_opt); fin_t = clock();
-            t_mo += (double)(fin_t - ini) / CLOCKS_PER_SEC;
+            for (int u = 0; u < num_umbrales; u++) {
+                copiarArreglo(base, copia, n);
+                ini = clock(); mergeSortOptRec(copia, 0, n-1, 4, umbrales[u]); fin_t = clock();
+                t_mo[u] += (double)(fin_t - ini) / CLOCKS_PER_SEC;
+            }
 
             copiarArreglo(base, copia, n);
             ini = clock(); quickSortRec(copia, 0, n-1, 4, 'u'); fin_t = clock();
@@ -217,29 +234,88 @@ void ejecutarExperimentoT2() {
             t_qm += (double)(fin_t - ini) / CLOCKS_PER_SEC;
         }
 
-        // Peor caso QS pivote ultimo: arreglo ya ordenado
+        // PEOR CASO QS: arreglo ya ordenado ascendente 
+        // Para 'u' y 'p' el peor caso es arreglo ordenado
+        // Para 'r' y 'm' igual se mide para comparar
         copiarArreglo(base, copia, n);
-        mergeSortRec(copia, 0, n-1, 4);
-        {
-            clock_t ini = clock();
-            quickSortRec(copia, 0, n-1, 4, 'u');
-            clock_t fin_t = clock();
-            t_qpeor = (double)(fin_t - ini) / CLOCKS_PER_SEC;
-        }
+        mergeSortRec(copia, 0, n-1, 4); // ordenar ascendente
+
+        Deportista *ordenado = (Deportista *)malloc(n * sizeof(Deportista));
+        copiarArreglo(copia, ordenado, n);
+
+        clock_t ini, fin_t;
+
+        copiarArreglo(ordenado, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'u'); fin_t = clock();
+        t_peor_u = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(ordenado, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'p'); fin_t = clock();
+        t_peor_p = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(ordenado, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'r'); fin_t = clock();
+        t_peor_r = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(ordenado, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'm'); fin_t = clock();
+        t_peor_m = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        // MEJOR CASO: arreglo ya ordenado (Merge Sort siempre O(n log n)) 
+        // Para QS el mejor caso practico es datos aleatorios con buena particion
+        // Usamos arreglo ordenado para Merge Sort (no cambia) y aleatorio para QS
+        copiarArreglo(ordenado, copia, n);
+        ini = clock(); mergeSortRec(copia, 0, n-1, 4); fin_t = clock();
+        t_mejor_mc = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        // Para QS mejor caso usamos datos mezclados una sola vez
+        mezclarDatos(base, n);
+
+        copiarArreglo(base, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'u'); fin_t = clock();
+        t_mejor_u = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(base, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'p'); fin_t = clock();
+        t_mejor_p = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(base, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'r'); fin_t = clock();
+        t_mejor_r = (double)(fin_t - ini) / CLOCKS_PER_SEC;
+
+        copiarArreglo(base, copia, n);
+        ini = clock(); quickSortRec(copia, 0, n-1, 4, 'm'); fin_t = clock();
+        t_mejor_m = (double)(fin_t - ini) / CLOCKS_PER_SEC;
 
         free(base);
         free(copia);
+        free(ordenado);
 
-        t_mc /= repeticiones; t_mo /= repeticiones;
+        // Promediar caso promedio
+        t_mc /= repeticiones;
+        for (int u = 0; u < num_umbrales; u++) t_mo[u] /= repeticiones;
         t_qu /= repeticiones; t_qp /= repeticiones;
         t_qr /= repeticiones; t_qm /= repeticiones;
 
-        fprintf(f, "%d,%f,%f,%f,%f,%f,%f,%f\n",
-                n, t_mc, t_mo, t_qu, t_qp, t_qr, t_qm, t_qpeor);
+        fprintf(f1, "%d,%f,%f,%f,%f,%f,%f,%f,%f\n",
+                n, t_mc, t_mo[0], t_mo[1], t_mo[2],
+                t_qu, t_qp, t_qr, t_qm);
+
+        fprintf(f2, "%d,%f,%f,%f,%f\n",
+                n, t_peor_u, t_peor_p, t_peor_r, t_peor_m);
+
+        fprintf(f3, "%d,%f,%f,%f,%f,%f\n",
+                n, t_mejor_mc, t_mejor_u, t_mejor_p, t_mejor_r, t_mejor_m);
 
         printf("  N=%-6d completado.\n", n);
     }
 
-    fclose(f);
-    printf("%s[EXPERIMENTO T2] Listo. Datos en db/tiempos_t2.csv%s\n", VERDE, RESET);
+    fclose(f1);
+    fclose(f2);
+    fclose(f3);
+
+    printf("%s[EXPERIMENTO T2] Listo. Archivos generados:%s\n", VERDE, RESET);
+    printf("  db/tiempos_t2_promedio.csv\n");
+    printf("  db/tiempos_t2_peor.csv\n");
+    printf("  db/tiempos_t2_mejor.csv\n");
 }
