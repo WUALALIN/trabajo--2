@@ -153,9 +153,9 @@ void quickSort(Deportista *a, int n, int criterio, char pivote) {
 // EXPERIMENTO DE TIEMPOS T2
 
 void ejecutarExperimentoT2() {
-    int valores_n[]  = {100, 500, 1000, 2000, 5000, 10000};
-    int num_vals     = 6;
-    int repeticiones = 5;
+    int valores_n[]  = {1000, 3000, 5000, 7000, 9000, 11000, 13000, 15000, 17000, 19000};
+    int num_vals     = 10;
+    int repeticiones = 10;
 
     // Umbrales a comparar para Merge Sort optimizado
     int umbrales[]   = {8, 16, 32};
