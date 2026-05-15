@@ -13,6 +13,10 @@ int particionar_mediana(Deportista arr[], int izquierda, int derecha);
 
 Deportista quick_select_mediana3(Deportista arr[], int izquierda, int derecha, int k);
 
+int particionPuntaje(Deportista arr[], int inicio, int fin);
+
+void ordenarPorPuntaje(Deportista arr[], int inicio, int fin);
+
 void ejecutarExperimentoT3();
 
 int comparar_desc(const void *a, const void *b);

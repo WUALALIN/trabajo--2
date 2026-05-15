@@ -8,6 +8,12 @@
 #include "interfaz.h"
 #include "ordenamiento.h"
 
+void swapDeportista(Deportista *a, Deportista *b) {
+    Deportista temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
 int particionar(Deportista arr[], int izquierda, int derecha) {
     int pivote = arr[derecha].puntaje;
     int i = izquierda - 1;
@@ -118,66 +124,168 @@ Deportista quick_select_mediana3(Deportista arr[], int izquierda, int derecha, i
 
 typedef struct {
     int n;
-    double time_ultimo;
-    double time_mediana;
+
+    double time_ultimo_mejor;
+    double time_ultimo_peor;
+
+    double time_mediana_mejor;
+    double time_mediana_peor;
+
 } ExecResult1;
 
+// Partición para ordenar por puntaje
+int particionPuntaje(Deportista arr[], int inicio, int fin) {
+    float pivote = arr[fin].puntaje;
+    int i = inicio - 1;
+
+    for (int j = inicio; j < fin; j++) {
+        if (arr[j].puntaje <= pivote) {
+            i++;
+            swapDeportista(&arr[i], &arr[j]);
+        }
+    }
+
+    swapDeportista(&arr[i + 1], &arr[fin]);
+
+    return i + 1;
+}
+
+// Quick Sort por puntaje
+void ordenarPorPuntaje(Deportista arr[], int inicio, int fin) {
+    if (inicio < fin) {
+        int pivoteIndex = particionPuntaje(arr, inicio, fin);
+
+        ordenarPorPuntaje(arr, inicio, pivoteIndex - 1);
+        ordenarPorPuntaje(arr, pivoteIndex + 1, fin);
+    }
+}
 
 void ejecutarExperimentoT3() {
     int valores_n[] = {
-    5000, 10000, 15000, 20000, 25000,
-    30000, 35000, 40000, 45000, 50000,
-    55000, 60000, 65000, 70000, 75000,
-    80000, 85000, 90000, 95000, 100000
+        2000, 4000, 6000, 8000, 10000,
+        12000, 14000, 16000, 18000, 20000,
+        22000, 24000, 26000, 28000, 30000,
+        32000, 34000, 36000, 38000, 40000
     };
+
     int num_values = 20;
-    int repeticiones = 10; 
+    int repeticiones = 10;
 
     ExecResult1 resultados[20];
-    
-    printf("\n%sIniciando experimento de medicion de tiempos (%d repeticiones)...%s\n", AMARILLO, repeticiones, RESET);
+
+    printf("\n%sIniciando experimento de Quick Select (%d repeticiones)...%s\n",
+           AMARILLO, repeticiones, RESET);
 
     for (int i = 0; i < num_values; i++) {
         int n = valores_n[i];
+
         resultados[i].n = n;
-        resultados[i].time_ultimo = 0; resultados[i].time_mediana = 0;
+
+        resultados[i].time_ultimo_mejor = 0;
+        resultados[i].time_ultimo_peor = 0;
+        resultados[i].time_mediana_mejor = 0;
+        resultados[i].time_mediana_peor = 0;
 
         Deportista *datos_base = NULL;
+
         generarDatos(&datos_base, &n);
-        Deportista *copia = (Deportista *)malloc(n * sizeof(Deportista));
 
-        srand(time(NULL));
-        int k = rand() % n;
-        printf("Posicion a encontrar: %d\n", k);
-        for (int r = 0; r < repeticiones; r++) {
-            mezclarDatos(datos_base, n); 
-            clock_t ini, fin;
-
-            copiarArreglo(datos_base, copia, n);
-            ini = clock(); quick_select(copia, 0, n-1, k); fin = clock();
-            resultados[i].time_ultimo += (double)(fin - ini) / CLOCKS_PER_SEC;
-
-            copiarArreglo(datos_base, copia, n);
-            ini = clock(); quick_select_mediana3(copia, 0, n-1, k); fin = clock();
-            resultados[i].time_mediana += (double)(fin - ini) / CLOCKS_PER_SEC;
+        if (datos_base == NULL) {
+            printf("Error al generar datos.\n");
+            return;
         }
 
-        resultados[i].time_ultimo /= repeticiones;
-        resultados[i].time_mediana /= repeticiones;
+        Deportista *copia = (Deportista *)malloc(n * sizeof(Deportista));
+
+        if (copia == NULL) {
+            printf("Error al reservar memoria.\n");
+            free(datos_base);
+            return;
+        }
+
+        ordenarPorPuntaje(datos_base, 0, n - 1);
+
+        for (int r = 0; r < repeticiones; r++) {
+            clock_t ini, fin;
+
+            int k_ultimo_mejor = n - 1;
+
+            copiarArreglo(datos_base, copia, n);
+
+            ini = clock();
+            quick_select(copia, 0, n - 1, k_ultimo_mejor);
+            fin = clock();
+
+            resultados[i].time_ultimo_mejor +=
+                (double)(fin - ini) / CLOCKS_PER_SEC;
+
+            int k_ultimo_peor = 0;
+
+            copiarArreglo(datos_base, copia, n);
+
+            ini = clock();
+            quick_select(copia, 0, n - 1, k_ultimo_peor);
+            fin = clock();
+
+            resultados[i].time_ultimo_peor +=
+                (double)(fin - ini) / CLOCKS_PER_SEC;
+
+            int k_mediana_mejor = n / 2;
+
+            copiarArreglo(datos_base, copia, n);
+
+            ini = clock();
+            quick_select_mediana3(copia, 0, n - 1, k_mediana_mejor);
+            fin = clock();
+
+            resultados[i].time_mediana_mejor +=
+                (double)(fin - ini) / CLOCKS_PER_SEC;
+
+            int k_mediana_peor = 0;
+
+            copiarArreglo(datos_base, copia, n);
+
+            ini = clock();
+            quick_select_mediana3(copia, 0, n - 1, k_mediana_peor);
+            fin = clock();
+
+            resultados[i].time_mediana_peor +=
+                (double)(fin - ini) / CLOCKS_PER_SEC;
+        }
+
+        resultados[i].time_ultimo_mejor /= repeticiones;
+        resultados[i].time_ultimo_peor /= repeticiones;
+        resultados[i].time_mediana_mejor /= repeticiones;
+        resultados[i].time_mediana_peor /= repeticiones;
 
         free(datos_base);
         free(copia);
+
         printf("N=%-6d completado.\n", n);
     }
 
     FILE *f = fopen("db/tiempos_quickSelect.csv", "w");
-    fprintf(f, "n,pivote_ultimo,pivote_mediana\n");
-    for (int i = 0; i < num_values; i++) {
-        fprintf(f, "%d,%f,%f\n", resultados[i].n, resultados[i].time_ultimo, 
-                                                        resultados[i].time_mediana);
+
+    if (f == NULL) {
+        printf("Error al crear el archivo db/tiempos_quickSelect.csv\n");
+        return;
     }
+
+    fprintf(f, "n,ultimo_mejor,ultimo_peor,mediana_mejor,mediana_peor\n");
+
+    for (int i = 0; i < num_values; i++) {
+        fprintf(f, "%d,%f,%f,%f,%f\n",
+                resultados[i].n,
+                resultados[i].time_ultimo_mejor,
+                resultados[i].time_ultimo_peor,
+                resultados[i].time_mediana_mejor,
+                resultados[i].time_mediana_peor);
+    }
+
     fclose(f);
-    printf("%sExperimento finalizado. Datos exportados a tiempos_quickSelect.csv%s\n", VERDE, RESET);
+
+    printf("%sExperimento finalizado. Datos exportados a db/tiempos_quickSelect.csv%s\n",
+           VERDE, RESET);
 }
 
 // comparación para qsort (orden descendente)
