@@ -29,10 +29,10 @@ void preparar_peor_caso(Deportista *arr, int n) {
 
 void medir() {
     // Archivos CSV separados por caso para un mejor análisis en el informe
-    FILE *f_rand = fopen("tiempos_ordenamiento_aleatorio.csv", "w");
-    FILE *f_mejor = fopen("tiempos_ordenamiento_mejor.csv", "w");
-    FILE *f_peor = fopen("tiempos_ordenamiento_peor.csv", "w");
-    FILE *f_search = fopen("tiempos_busqueda_peor_caso.csv", "w");
+    FILE *f_rand = fopen("db/tiempos_ordenamiento_aleatorio.csv", "w");
+    FILE *f_mejor = fopen("db/tiempos_ordenamiento_mejor.csv", "w");
+    FILE *f_peor = fopen("db/tiempos_ordenamiento_peor.csv", "w");
+    FILE *f_search = fopen("db/tiempos_busqueda_peor_caso.csv", "w");
     
     if (!f_rand || !f_mejor || !f_peor || !f_search) return;
 
@@ -41,8 +41,8 @@ void medir() {
     fprintf(f_peor, "N,Bubble,Insertion,Selection,Cocktail\n");
     fprintf(f_search, "N,Caso,Secuencial,BinariaRec,Exponencial,Interpolacion\n");
 
-    int tamanos[] = {1000, 3000, 5000, 8000, 10000}; 
-    int num_pasos = 5;
+    int tamanos[] = {1000, 3000, 5000, 7000, 9000, 11000, 13000, 15000, 17000, 19000}; 
+    int num_pasos = 10;
     Deportista *arr = NULL;
     clock_t start, end;
 

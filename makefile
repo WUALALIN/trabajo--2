@@ -101,7 +101,6 @@ graficos: $(BUILD_DIR)/$(BENCHMARK)$(EXE)
 	@echo Ejecutando mediciones...
 	$(RUN_BENCH)
 	@echo Generando graficos...
-	gnuplot plot_tiempos.gp
 
 clean:
 ifeq ($(OS),Windows_NT)
